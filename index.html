@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>แบบฟอร์มบันทึกข้อมูล VOC</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-color:#4a90e2; --bg:#f4f6f8; --card:#fff; --text:#333; --border:#ddd;
+      --ok:#28a745; --err:#dc3545; --record:#ff4136;
+    }
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:'Kanit',sans-serif}
+    .container{max-width:640px;margin:32px auto;padding:24px 28px;background:var(--card);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.08)}
+    h1{margin:0 0 16px;font-weight:600;text-align:center}
+    .form-group{margin-bottom:16px}
+    label{display:block;margin-bottom:6px}
+    input,select,textarea,button{font-family:'Kanit',sans-serif;font-size:16px}
+    input,select,textarea{width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;box-sizing:border-box}
+    textarea{min-height:120px;resize:vertical}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary-color);box-shadow:0 0 0 2px rgba(74,144,226,.18)}
+    .required{color:var(--err);margin-left:4px}
+    .row{display:flex;gap:10px}
+    .row>*{flex:1}
+    .actions{margin-top:14px}
+    button[type=submit]{width:100%;padding:14px;background:var(--primary-color);color:#fff;border:none;border-radius:10px;cursor:pointer}
+    button[disabled]{opacity:.6;cursor:not-allowed}
+    #status{margin-top:12px;display:none;padding:10px;border-radius:8px;font-size:14px}
+    #status.ok{display:block;background:#eaf7ee;color:var(--ok)}
+    #status.err{display:block;background:#fdebea;color:var(--err)}
+    .label-row{display:flex;justify-content:space-between;align-items:center}
+    #micButton{width:36px;height:36px;border-radius:999px;border:1px solid var(--border);background:#fff;cursor:pointer}
+    #micButton.listening{background:var(--record);color:#fff;border-color:var(--record);animation:pulse 1.5s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,65,54,.6)}70%{box-shadow:0 0 0 12px rgba(255,65,54,0)}100%{box-shadow:0 0 0 0 rgba(255,65,54,0)}}
+    /* Debug */
+    .debug{margin-top:18px;padding:12px;border:1px dashed #cfd6e0;border-radius:10px;background:#f8f9fb}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+    .badge{padding:2px 8px;border-radius:999px;background:#eef3fb;border:1px solid #cbd9f6;font-size:12px}
+    .log{background:#0b1020;color:#cfe3ff;border-radius:8px;padding:8px;max-height:160px;overflow:auto;white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,Menlo,monospace}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>แบบฟอร์มบันทึกข้อมูล VOC</h1>
+    <form id="vocForm" novalidate>
+      <div class="form-group">
+        <label>ประเภทการดำเนินงาน<span class="required">*</span></label>
+        <select id="operationType" required>
+          <option value="สอบถามข้อมูลทั่วไป">สอบถามข้อมูลทั่วไป</option>
+          <option value="สอบถามข้อมูลโครงการที่อยู่อาศัย">สอบถามข้อมูลโครงการที่อยู่อาศัย</option>
+          <option value="รับฟังความคิดเห็น" selected>รับฟังความคิดเห็น</option>
+          <option value="ร้องเรียนเรื่องทั่วไป">ร้องเรียนเรื่องทั่วไป</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>ชื่อ<span class="required">*</span></label>
+          <input id="firstName" required />
+        </div>
+        <div class="form-group">
+          <label>นามสกุล<span class="required">*</span></label>
+          <input id="lastName" required />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>อีเมลล์<span class="required">*</span></label>
+          <input id="email" type="email" required />
+        </div>
+        <div class="form-group">
+          <label>เบอร์ติดต่อ<span class="required">*</span></label>
+          <input id="phone" type="tel" placeholder="เช่น 081-234-5678" maxlength="13" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="label-row">
+          <label>รายละเอียด<span class="required">*</span></label>
+          <button type="button" id="micButton" title="พูดเพื่อป้อนข้อความ">🎤</button>
+        </div>
+        <textarea id="details" required></textarea>
+      </div>
+
+      <div class="actions">
+        <button id="submitBtn" type="submit">บันทึกข้อมูล</button>
+      </div>
+      <div id="status"></div>
+    </form>
+
+    <!-- STT Debug Panel -->
+    <div class="debug">
+      <div class="badges">
+        <span class="badge">STT Debug</span>
+        <span id="sttSupport" class="badge">ตรวจสอบการรองรับ…</span>
+        <span id="sttState" class="badge">Idle</span>
+        <span id="sttRetry" class="badge">Retry: 0</span>
+        <span id="originInfo" class="badge">Origin: loading…</span>
+        <button id="btnTestMic" type="button" class="badge" style="cursor:pointer">ทดสอบไมค์ (ขอสิทธิ์)</button>
+      </div>
+      <div id="sttLog" class="log" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <script>
+    // ========= 1) CONFIG =========
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-qwSE0OLrH4gDW9_NDHbo02h3BcoTlbldcgHxqup7CC6Obso20xRgHXYjI4m3TRby/exec
+'; // ← ใส่ URL ของ Apps Script Web App
+
+    // ========= 2) FORM SUBMIT =========
+    const form = document.getElementById('vocForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusEl = document.getElementById('status');
+    function setStatus(type, msg){
+      statusEl.className = type === 'ok' ? 'ok' : 'err';
+      statusEl.textContent = msg || '';
+      statusEl.style.display = 'block';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusEl.style.display = 'none';
+
+      // validate แบบง่าย
+      if(!form.checkValidity()){
+        setStatus('err','กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
+        return;
+      }
+
+      submitBtn.disabled = true; submitBtn.textContent = 'กำลังบันทึก...';
+      const payload = {
+        operationType: document.getElementById('operationType').value,
+        firstName:      document.getElementById('firstName').value,
+        lastName:       document.getElementById('lastName').value,
+        email:          document.getElementById('email').value,
+        phone:          document.getElementById('phone').value,
+        details:        document.getElementById('details').value,
+      };
+
+      try{
+        const res = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json().catch(()=>({}));
+        setStatus('ok', data.message || 'บันทึกข้อมูลเรียบร้อย');
+        form.reset();
+      }catch(err){
+        setStatus('err', 'บันทึกไม่สำเร็จ: ' + (err.message || err));
+      }finally{
+        submitBtn.disabled = false; submitBtn.textContent = 'บันทึกข้อมูล';
+      }
+    });
+
+    // ========= 3) SPEECH RECOGNITION (Chrome/Android แนะนำ) =========
+    const micButton = document.getElementById('micButton');
+    const detailsTextarea = document.getElementById('details');
+
+    const sttLogEl = document.getElementById('sttLog');
+    const sttStateEl = document.getElementById('sttState');
+    const sttSupportEl = document.getElementById('sttSupport');
+    const sttRetryEl = document.getElementById('sttRetry');
+    const btnTestMic = document.getElementById('btnTestMic');
+    const originInfo = document.getElementById('originInfo');
+    originInfo.textContent = 'Origin: ' + location.origin;
+
+    function log(msg){ const t=new Date().toLocaleTimeString(); sttLogEl.textContent += `[${t}] ${msg}\n`; sttLogEl.scrollTop=sttLogEl.scrollHeight; console.log('[STT]',msg); }
+    function setState(s){ sttStateEl.textContent = s; }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      sttSupportEl.textContent = 'รองรับ SpeechRecognition';
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'th-TH';
+      recognition.interimResults = false;
+      recognition.continuous = true;  // continuous mode
+
+      let isListening = false;
+      let retry = 0, MAX_RETRY = 1;
+
+      micButton.addEventListener('click', () => {
+        if (isListening) recognition.stop(); else { retry = 0; safeStart(); }
+      });
+
+      function safeStart(){
+        try{ recognition.start(); setState('Starting…'); log('เรียก recognition.start()'); }
+        catch(e){ log('start() error: ' + (e?.message||e)); }
+      }
+
+      recognition.onstart = () => { isListening = true; micButton.classList.add('listening'); setState('Listening'); log('onstart'); };
+      recognition.onend   = () => { isListening = false; micButton.classList.remove('listening'); setState('Idle'); log('onend'); };
+      recognition.onaudiostart = () => log('onaudiostart');
+      recognition.onaudioend   = () => log('onaudioend');
+      recognition.onsoundstart = () => log('onsoundstart');
+      recognition.onsoundend   = () => log('onsoundend');
+      recognition.onspeechstart= () => log('onspeechstart');
+      recognition.onspeechend  = () => log('onspeechend');
+
+      recognition.onresult = (e) => {
+        const r = e.results[e.results.length-1][0];
+        const transcript = (r && r.transcript || '').trim();
+        if(transcript){
+          const existing = detailsTextarea.value.trim();
+          detailsTextarea.value = existing + (existing ? ' ' : '') + transcript;
+          log(`ผลลัพธ์: "${transcript}" (confidence=${(r.confidence??'').toString().slice(0,4)})`);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        const err = event?.error || 'unknown';
+        setState('Error'); log('error: ' + err);
+        let msg = '';
+        if (err === 'no-speech') {
+          msg = 'ไม่ตรวจพบเสียงพูด กรุณาพูดใกล้ไมโครโฟน และลองใหม่';
+          if (retry < MAX_RETRY){ retry++; sttRetryEl.textContent = 'Retry: ' + retry; log('no-speech → auto-restart'); setTimeout(safeStart, 350); return; }
+        } else if (err === 'not-allowed' || err === 'service-not-allowed') {
+          msg = 'ไม่ได้รับสิทธิ์ไมโครโฟน กรุณาอนุญาตการใช้งานไมโครโฟนในเบราว์เซอร์';
+        } else if (err === 'audio-capture') {
+          msg = 'ไม่พบอุปกรณ์ไมโครโฟน กรุณาตรวจสอบการเชื่อมต่อ';
+        } else if (err === 'network') {
+          msg = 'ปัญหาเครือข่าย กรุณาลองใหม่';
+        } else {
+          msg = `เกิดข้อผิดพลาด: ${err}`;
+        }
+        alert(msg);
+      };
+
+      // ปุ่มขอสิทธิ์ไมค์ล่วงหน้า
+      btnTestMic.addEventListener('click', async () => {
+        try{
+          if(!navigator.mediaDevices?.getUserMedia){ alert('เบราว์เซอร์ไม่รองรับ getUserMedia'); log('getUserMedia not supported'); return; }
+          setState('Request Mic…');
+          const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+          stream.getTracks().forEach(t=>t.stop());
+          setState('Idle'); alert('ขอสิทธิ์ไมโครโฟนสำเร็จ พร้อมใช้งาน');
+          log('granted mic permission');
+        }catch(e){
+          setState('Error'); alert('ไม่สามารถขอสิทธิ์ไมโครโฟนได้ โปรดตรวจสอบการตั้งค่าเบราว์เซอร์');
+          log('getUserMedia error: ' + (e?.message||e));
+        }
+      });
+
+      // คำเตือน iOS
+      (function(){
+        const ua = navigator.userAgent||'';
+        const isiOS = /iPad|iPhone|iPod/.test(ua);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+        if (isiOS && isSafari) log('คำเตือน: iOS Safari ยังไม่รองรับ Web Speech API แบบเต็มรูปแบบ');
+      })();
+
+    } else {
+      sttSupportEl.textContent = 'ไม่รองรับ SpeechRecognition';
+      document.getElementById('micButton').style.display = 'none';
+      log('เบราว์เซอร์นี้ไม่รองรับ Web Speech API');
+    }
+  </script>
+</body>
+</html>
