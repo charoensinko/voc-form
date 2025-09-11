@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --background-color: #f4f6f8;
+            --form-bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --record-color: #ff4136;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--form-bg-color);
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            margin: 0 15px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            font-weight: 500;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        h2 {
+            text-align: center;
+            color: var(--text-color);
+            font-weight: 500;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: 'Kanit', sans-serif;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+
+        /* Style for disabled inputs */
+        input:disabled,
+        select:disabled,
+        textarea:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #357abd;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .required-mark {
+            color: var(--error-color);
+            margin-left: 4px;
+        }
+
+        .label-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .label-container label {
+            margin-bottom: 0;
+        }
+
+        #micButton {
+            background-color: transparent;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        #micButton:hover {
+            background-color: #f0f0f0;
+            border-color: var(--primary-color);
+        }
+
+        #micButton.listening {
+            background-color: var(--record-color);
+            color: white;
+            border-color: var(--record-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 65, 54, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 65, 54, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 65, 54, 0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding-top: 20px;
+            }
+
+            .container {
+                padding: 20px;
+                margin: 0 10px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            button[type="submit"] {
+                font-size: 16px;
+            }
+        }
+
+        /* กำหนด Format ให้ datalist */
+        /* สไตล์ input ที่มี datalist ให้ดูเหมือน select */
+        input[list], #department {
+            appearance: none;
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 12px;
+            padding-right: 0px;
+            height: 50px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: 'Kanit', sans-serif;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[list]:focus,
+        #department:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+            font-family: 'Kanit', sans-serif;
+            font-size: 16px;
+        }
+
+        .combo {
+            position: relative;
+            width: 100%;
+        }
+
+        .combo__arrow {
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            height: calc(50px - 2px);   /* สูงเท่ากับช่อง (หักขอบ 1px บนล่าง) */
+            width: 36px;
+            border: none;
+            background: #fff;
+            cursor: pointer;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        .combo__arrow:focus {
+            outline: none;
+        }
+
+        .combo__arrow:disabled {
+            background-color: #ffffff;
+            cursor: not-allowed;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>แบบฟอร์มบันทึกข้อมูลเสียงของลูกค้า (VOC)</h1>
+        <h2>การเคหะแห่งชาติ</h2>
+        <form id="vocForm">
+
+            <div class="form-group">
+                <label for="respondentType">ประเภทผู้ตอบ<span class="required-mark">*</span></label>
+                <select id="respondentType" name="respondentType" required>
+                    <option value="ลูกค้า" selected>ลูกค้า</option>
+                    <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
+                    <option value="เจ้าหน้าที่/บุคลากรของการเคหะแห่งชาติ">เจ้าหน้าที่/บุคลากรของการเคหะแห่งชาติ</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="department">ฝ่าย</label>
+                <div class="combo">
+                    <input id="department" name="department" list="department-list"
+                        placeholder="พิมพ์ชื่อย่อ ของฝ่าย เช่น กต., บข. หรือคลิกเลือกรายการ">
+                    <button type="button" class="combo__arrow"></button>
+                </div>
+                <datalist id="department-list"></datalist>
+            </div>
+
+            <div class="form-group">
+                <label for="operationType">ประเภทการดำเนินงาน<span class="required-mark">*</span></label>
+                <select id="operationType" name="operationType" required>
+                    <option value="สอบถามข้อมูลทั่วไป">สอบถามข้อมูลทั่วไป</option>
+                    <option value="สอบถามข้อมูลโครงการที่อยู่อาศัย">สอบถามข้อมูลโครงการที่อยู่อาศัย</option>
+                    <option value="รับฟังความคิดเห็น" selected>รับฟังความคิดเห็น</option>
+                    <option value="ร้องเรียนเรื่องทั่วไป">ร้องเรียนเรื่องทั่วไป</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="firstName">ชื่อ<span class="required-mark">*</span></label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">นามสกุล<span class="required-mark">*</span></label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">อีเมลล์<span class="required-mark">*</span></label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">เบอร์ติดต่อ<span class="required-mark">*</span></label>
+                <input type="tel" id="phone" name="phone" required placeholder="เช่น 081-234-5678" maxlength="13">
+            </div>
+
+            <div class="form-group">
+                <div class="label-container">
+                    <label for="details">รายละเอียด<span class="required-mark">*</span></label>
+                    <!-- <button type="button" id="micButton" title="พูดเพื่อป้อนข้อความ">🎤</button> -->
+                </div>
+                <textarea id="details" name="details" required></textarea>
+            </div>
+
+            <button type="submit" id="submitButton">บันทึกข้อมูล</button>
+        </form>
+    </div>
+
+    <script>
+        // ❗ IMPORTANT: ใส่ URL ของ Web App ที่ได้จากการ Deploy ใน Code.gs ที่นี่
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-qwSE0OLrH4gDW9_NDHbo02h3BcoTlbldcgHxqup7CC6Obso20xRgHXYjI4m3TRby/exec';
+
+        const form = document.getElementById('vocForm');
+        const submitButton = document.getElementById('submitButton');
+
+        // --- START: CODE ADDED TO HANDLE FIELD LOGIC ---
+        const respondentTypeSelect = document.getElementById('respondentType');
+        const departmentInput = document.getElementById('department');
+        const departmentArrow = document.querySelector('.combo__arrow');
+
+        function toggleDepartmentField() {
+            const isInternalStaff = respondentTypeSelect.value === 'เจ้าหน้าที่/บุคลากรของการเคหะแห่งชาติ';
+
+            if (isInternalStaff) {
+                // If user is staff, enable the field and show placeholder
+                departmentInput.disabled = false;
+                departmentArrow.disabled = false;
+                departmentInput.placeholder = 'พิมพ์ชื่อย่อ ของฝ่าย เช่น กต., บข. หรือคลิกเลือกรายการ';
+            } else {
+                // If user is a customer or general public, disable the field, clear it, and remove placeholder
+                departmentInput.disabled = true;
+                departmentArrow.disabled = true;
+                departmentInput.value = '';
+                departmentInput.placeholder = '';
+            }
+        }
+
+        // Add event listener to trigger the function on change
+        respondentTypeSelect.addEventListener('change', toggleDepartmentField);
+
+        // Run the function once on page load to set the initial state correctly
+        document.addEventListener('DOMContentLoaded', toggleDepartmentField);
+        // --- END: CODE ADDED ---
+
+        // รายชื่อฝ่ายทั้งหมด 37 ฝ่าย
+            const departments = [
+                "กต.", "กบค.", "กม.", "กย.1", "กย.2", "กย.3",
+                "คตก.", "จป.", "ชบ.", "ชล.", "ชน.", "ชฉ.",
+                "ชอ.", "ชต.", "ชส.", "ตภ.", "ทด.", "ทบ.",
+                "ทส.", "ทอ.", "นผ.", "บข.", "บช.", "บป.",
+                "บส.", "ปบ.", "พก.1", "พก.2.", "พก.3.", "พค.",
+                "ฟม.", "ลคช.", "วช.", "สก.", "สน.", "สว.",
+                "อก."
+            ];
+
+            // เรียงชื่อฝ่ายตามลำดับอักษร
+            const sortedDepartments = departments.sort();
+
+            // อ้างอิง datalist
+            const datalist = document.getElementById("department-list");
+
+            // เติม option เข้า datalist
+            sortedDepartments.forEach(dep => {
+                const option = document.createElement("option");
+                option.value = dep;
+                datalist.appendChild(option);
+            });
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'กำลังบันทึก...';
+
+            const formData = {
+                respondentType: form.elements.respondentType.value,
+                department: form.elements.department.value,
+                operationType: form.elements.operationType.value,
+                firstName: form.elements.firstName.value,
+                lastName: form.elements.lastName.value,
+                email: form.elements.email.value,
+                phone: form.elements.phone.value,
+                details: form.elements.details.value
+            };
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => {
+                    alert('บันทึกข้อมูลสำเร็จ!');
+                    form.reset();
+                    // After resetting the form, re-run the logic to ensure the department field is correctly disabled
+                    toggleDepartmentField();
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    alert('เกิดข้อผิดพลาดในการส่งข้อมูล: ' + error.message);
+                })
+                .finally(() => {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'บันทึกข้อมูล';
+                });
+        });
+
+        // --- Speech to Text ---  ถ้าต้องการใช้ ให้ไป Uncomment บรรทัดที่ 330 โค้ด <button type="button" id="micButton" title="พูดเพื่อป้อนข้อความ">
+        const micButton = document.getElementById('micButton');
+        const detailsTextarea = document.getElementById('details');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'th-TH';
+            recognition.interimResults = false;
+            micButton.addEventListener('click', () => {
+                if (micButton.classList.contains('listening')) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            });
+            recognition.onstart = () => {
+                micButton.classList.add('listening');
+                micButton.title = 'หยุดการบันทึกเสียง';
+            };
+            recognition.onend = () => {
+                micButton.classList.remove('listening');
+                micButton.title = 'พูดเพื่อป้อนข้อความ';
+            };
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                alert(`เกิดข้อผิดพลาดในการรู้จำเสียง: ${event.error}`);
+            };
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim();
+                const existingText = detailsTextarea.value.trim();
+                detailsTextarea.value = existingText + (existingText.length > 0 ? ' ' : '') + transcript;
+            };
+        } else {
+            console.log('Speech Recognition API not supported in this browser.');
+            if (micButton) micButton.style.display = 'none';
+        }
+
+    </script>
+</body>
+
+</html>
